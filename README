@@ -1,0 +1,5 @@
+This provides a UserRegistry and UserRegistryMiddleware classes
+
+Add the middleware to your list of middlewares; make sure it is added after the AuthenticationMiddleware
+
+In model or signal code you can now access the UserRegistery class to see if an authenticated user exists and if so, be able to use that user.
