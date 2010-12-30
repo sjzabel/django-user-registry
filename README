@@ -3,3 +3,43 @@ This provides a UserRegistry and UserRegistryMiddleware classes
 Add the middleware to your list of middlewares; make sure it is added after the AuthenticationMiddleware
 
 In model or signal code you can now access the UserRegistery class to see if an authenticated user exists and if so, be able to use that user.
+
+Example
+(in settings.py)
+
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+
+    # 3rd party
+    # allow access to authenticated users in models and signals
+    'user_registry.middleware.UserRegistryMiddleware',
+)
+
+(in foo/signals.py)
+
+from django.db.models.signals import post_save, post_delete, m2m_changed
+from django.dispatch import receiver
+
+from user_registry import UserRegistry 
+
+def alert_on_user():
+    print "alert_on_user"
+    if UserRegistry.has_user():
+        user = UserRegistry.get_user()
+        print user
+
+@receiver(post_save)
+def post_save_audit(sender,**kwargs):
+    alert_on_user()
+
+@receiver(post_delete)
+def post_delete_audit(sender,**kwargs):
+    alert_on_user()
+
+@receiver(m2m_changed)
+def m2m_changed_audit(sender,**kwargs):
+    alert_on_user()
