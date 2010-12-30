@@ -41,8 +41,11 @@ class UserRegistry(object):
             raise UserRegistryUnregisterError()
 
         if not klass._user == user:
-            raise UserRegistryUnregisterWrongUserError()
-
+            if klass._user.is_authenticated() and user.is_authenticated():
+                raise UserRegistryUnregisterWrongUserError()
+            else:
+                #could be a login/logoff... let pass
+                pass
         klass._user = None
 
     @classmethod
