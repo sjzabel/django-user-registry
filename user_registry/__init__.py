@@ -20,7 +20,6 @@ class UserRegistry(object):
         '''
         _user should always None else raise error
         '''
-        print 'register'
         if klass._user:
             raise UserRegistryRegisterError()
 
@@ -31,10 +30,6 @@ class UserRegistry(object):
         '''
         _user should always None else raise error
         '''
-        print 'logged_in_register'
-        print user
-        print klass._user
-        print klass._user == user
         if klass._user and klass._user.is_authenticated():
             raise UserRegistryRegisterError()
 
@@ -45,8 +40,6 @@ class UserRegistry(object):
         '''
         _user should not be None else raise error
         '''
-        print 'unregister'
-        print user
         if not klass._user:
             raise UserRegistryUnregisterError()
 
@@ -60,10 +53,6 @@ class UserRegistry(object):
         '''
         _user should always None else raise error
         '''
-        print 'logged_out_unregister'
-        print user
-        print klass._user
-        print klass._user == user
         if not (klass._user and klass._user == user):
             raise UserRegistryRegisterError()
 
@@ -84,7 +73,6 @@ def user_logged_in_receiver(sender,**kwargs):
 
     If there is an existing Anon user we can change it out for the correct user
     '''
-    print 'logged in receiver'
     user = kwargs['user']
     request = kwargs['request']
     UserRegistry.logged_in_register(user,request)
@@ -97,7 +85,6 @@ def user_logged_out_receiver(sender,**kwargs):
 
     If there is an existing user, we can change it out for an anon user
     '''
-    print 'logged out receiver'
     user = kwargs['user']
     request = kwargs['request']
     UserRegistry.logged_out_unregister(user,request)
