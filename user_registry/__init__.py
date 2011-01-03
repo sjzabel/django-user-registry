@@ -1,4 +1,7 @@
 from user_registry.exceptions import UserRegistryRegisterError, UserRegistryUnregisterError, UserRegistryUnregisterWrongUserError
+from django.contrib.auth.signals import user_logged_in,user_logged_out
+from django.dispatch import receiver
+from django.contrib.auth.models import AnonymousUser
 
 class UserRegistry(object):
     '''
@@ -13,30 +16,58 @@ class UserRegistry(object):
     _user = None
 
     @classmethod
-    def register(klass,user):
+    def register(klass,user,request):
         '''
         _user should always None else raise error
         '''
+        print 'register'
         if klass._user:
             raise UserRegistryRegisterError()
 
         klass._user = user
 
     @classmethod
-    def unregister(klass,user):
+    def logged_in_register(klass,user,request):
+        '''
+        _user should always None else raise error
+        '''
+        print 'logged_in_register'
+        print user
+        print klass._user
+        print klass._user == user
+        if klass._user and klass._user.is_authenticated():
+            raise UserRegistryRegisterError()
+
+        klass._user = user
+
+    @classmethod
+    def unregister(klass,user,request):
         '''
         _user should not be None else raise error
         '''
+        print 'unregister'
+        print user
         if not klass._user:
             raise UserRegistryUnregisterError()
 
         if not klass._user == user:
-            if klass._user.is_authenticated() and user.is_authenticated():
-                raise UserRegistryUnregisterWrongUserError()
-            else:
-                #could be a login/logoff... let pass
-                pass
+            raise UserRegistryUnregisterWrongUserError()
+
         klass._user = None
+
+    @classmethod
+    def logged_out_unregister(klass,user,request):
+        '''
+        _user should always None else raise error
+        '''
+        print 'logged_out_unregister'
+        print user
+        print klass._user
+        print klass._user == user
+        if not (klass._user and klass._user == user):
+            raise UserRegistryRegisterError()
+
+        klass._user = AnonymousUser()
 
     @classmethod
     def has_user(klass):
@@ -45,4 +76,29 @@ class UserRegistry(object):
     @classmethod
     def get_user(klass):
         return klass._user
+
+@receiver(user_logged_in, dispatch_uid="user_registry_user_logged_in")
+def user_logged_in_receiver(sender,**kwargs):
+    '''
+    The signal of when a user logs in
+
+    If there is an existing Anon user we can change it out for the correct user
+    '''
+    print 'logged in receiver'
+    user = kwargs['user']
+    request = kwargs['request']
+    UserRegistry.logged_in_register(user,request)
+
+
+@receiver(user_logged_out, dispatch_uid="user_registry_user_logged_in")
+def user_logged_out_receiver(sender,**kwargs):
+    '''
+    The signal of when a user logs out
+
+    If there is an existing user, we can change it out for an anon user
+    '''
+    print 'logged out receiver'
+    user = kwargs['user']
+    request = kwargs['request']
+    UserRegistry.logged_out_unregister(user,request)
 
