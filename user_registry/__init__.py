@@ -16,7 +16,7 @@ class UserRegistry(object):
     _user = None
 
     @classmethod
-    def register(klass,user,request):
+    def register(klass,user,request=None):
         '''
         _user should always None else raise error
         '''
@@ -26,7 +26,7 @@ class UserRegistry(object):
         klass._user = user
 
     @classmethod
-    def logged_in_register(klass,user,request):
+    def logged_in_register(klass,user,request=None):
         '''
         _user should always None else raise error
         '''
@@ -36,7 +36,7 @@ class UserRegistry(object):
         klass._user = user
 
     @classmethod
-    def unregister(klass,user,request):
+    def unregister(klass,user,request=None):
         '''
         _user should not be None else raise error
         '''
@@ -49,7 +49,7 @@ class UserRegistry(object):
         klass._user = None
 
     @classmethod
-    def logged_out_unregister(klass,user,request):
+    def logged_out_unregister(klass,user,request=None):
         '''
         _user should always None else raise error
         '''
